@@ -21,14 +21,14 @@ const StockInformation = () => {
         }
     }
 
-    const onChange = (e: any) => {
+    const handleChange = (e: any) => {
         setStockTicker(e?.target?.value)
     }
 
 
     return (
         <>
-            <TextField size={'small'} title={'Stock'} onChange={(e) => onChange(e)}
+            <TextField size={'small'} title={'Stock'} onChange={(e) => handleChange(e)}
                        label={'Please input a stock ticker'} autoFocus required inputProps={{maxLength: 4}}/>
             <Table sx={{minWidth: 650}} size="small" aria-label="a dense table">
                 <TableHead>
