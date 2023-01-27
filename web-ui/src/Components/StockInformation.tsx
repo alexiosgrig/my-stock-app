@@ -1,28 +1,35 @@
-import React, {useEffect, useRef, useState} from "react";
-import {Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@mui/material";
+import React, {useEffect, useState} from "react";
+import {Button, Table, TableBody, TableCell, TableHead, TableRow, TextField} from "@mui/material";
 import Service from "../Api/Service";
 import IGetStockSymbol from "../Interface/IGetStockSymbol";
 
-const DataTable = () => {
+const StockInformation = () => {
 
     const [stock, setStock] = useState<IGetStockSymbol>()
-    const textInputRef = useRef<HTMLDivElement>()
-
-    const getStockBySymbol = async () => {
-        const res = await Service.getStockBySymbol('AAPL')
-        setStock(res)
-        console.log(res)
-    }
+    const [stockTicker, setStockTicker] = useState<string>('')
 
     useEffect(() => {
-        getStockBySymbol()
-        console.log(textInputRef)
-    }, [])
+        stockTicker !== '' && getStockBySymbol()
+    }, [stockTicker])
+
+    const getStockBySymbol = async () => {
+        try {
+            const res = await Service.getStockBySymbol(stockTicker)
+            setStock(res)
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
+    const onChange = (e: any) => {
+        setStockTicker(e?.target?.value)
+    }
 
 
     return (
         <>
-            <TextField size={'small'} title={'Stock'} disabled={false} onChange={(e) => console.log(e)}/>
+            <TextField size={'small'} title={'Stock'} onChange={(e) => onChange(e)}
+                       label={'Please input a stock ticker'} autoFocus required inputProps={{maxLength: 4}}/>
             <Table sx={{minWidth: 650}} size="small" aria-label="a dense table">
                 <TableHead>
                     <TableRow>
@@ -43,11 +50,12 @@ const DataTable = () => {
                         <TableCell align="right">{stock?.name}</TableCell>
                         <TableCell align="right">{stock?.country}</TableCell>
                         <TableCell align="right">{stock?.ipo}</TableCell>
+                        <TableCell> <Button title={'text'}/> </TableCell>
+
                     </TableRow>
                 </TableBody>
             </Table>
         </>
     )
 }
-
-export default DataTable
+export default StockInformation
