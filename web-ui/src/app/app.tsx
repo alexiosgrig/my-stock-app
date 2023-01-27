@@ -1,10 +1,14 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import DataTable from "../Components/DataTable";
+import Routing from "../Routes/Routing";
+import {BrowserRouter} from "react-router-dom";
 
 export function App() {
 
     return (
-        <DataTable/>
+        <BrowserRouter>
+            <Routing/>
+        </BrowserRouter>
+
     );
 }
 
