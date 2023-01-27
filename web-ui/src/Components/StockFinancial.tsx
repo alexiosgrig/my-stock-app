@@ -1,10 +1,11 @@
 import * as React from 'react';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import TextField from '@mui/material/TextField';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {
-    Button,
-    FormControl,
+    Button, Dialog, DialogActions, DialogContent, DialogTitle,
+    FormControl, IconButton,
     InputLabel,
     MenuItem,
     Select,
@@ -22,12 +23,13 @@ import {IGetFinancialReports} from "../Interface/IGetFinancialReports";
 
 const StockFinancial = () => {
     const date = new Date();
-    date.setDate(date.getDate() + 7);
-    const [dateFrom, setDateFrom] = useState<any>(new Date());
-    const [dateTo, setDateTo] = useState<any>(date);
-    const [frequency, setFrequency] = useState<string>();
-    const [stock, setStock] = useState('annual')
-    const [data, setData] = useState<IGetFinancialReports[] | undefined>()
+    date.setDate(date.getDate() - 7);
+    const [dateFrom, setDateFrom] = useState<any>(date);
+    const [dateTo, setDateTo] = useState<any>(new Date());
+    const [frequency, setFrequency] = useState<string>('annual');
+    const [stock, setStock] = useState('')
+    const [stockData, setStockData] = useState<IGetFinancialReports[] | undefined>()
+    const [openModal, setOpenModal] = useState(false)
 
     // @ts-ignore
     const updateDateTo = new Date(dateTo).toISOString().split('T')[0];
@@ -46,13 +48,26 @@ const StockFinancial = () => {
 
     const getStockFinancialData = async () => {
         const res = await Service.getStockFinancialReport(stock, frequency, updateDateFrom, updateDateTo)
-        setData(res)
+        setStockData(res.data)
+    }
+
+    const isModalOpen = () => {
+        setOpenModal(true)
+    }
+
+    const closeModal = () => {
+        setOpenModal(false)
     }
     useEffect(() => {
-        getStockFinancialData()
-        console.log(updateDateTo, updateDateFrom, data)
-    }, [dateFrom, dateTo, stock])
+        if (frequency.length > 0 && stock.length > 0) {
+            getStockFinancialData()
+        }
+        console.log(updateDateTo, updateDateFrom, stockData)
+    }, [dateFrom, dateTo, stock, frequency])
 
+    const reports = stockData?.length && stockData?.map(data => data.report)
+    const bs = reports?.map(e => e.bs)
+    console.log(bs);
 
     return (
         <>
@@ -70,6 +85,7 @@ const StockFinancial = () => {
                         renderInput={(params) => <TextField {...params} />}
                     />
                     <DesktopDatePicker
+                        maxDate={new Date()}
                         label="Date to"
                         inputFormat="yyyy/MM/dd"
                         value={dateTo}
@@ -85,40 +101,74 @@ const StockFinancial = () => {
                 <Select
                     labelId="frequency-id"
                     id="frequency-id"
-                    value={'frequency'}
-                    label="Frequency"
+                    value={frequency}
+                    label={frequency}
                     onChange={handleChange}
                 >
                     <MenuItem value={'quarterly'}>Quarterly</MenuItem>
                     <MenuItem value={'annual'}>Annual</MenuItem>
                 </Select>
             </FormControl>
-
-            <Table sx={{minWidth: 650}} size="small" aria-label="a dense table">
+            <Table size='medium' aria-label="a dense table">
                 <TableHead>
                     <TableRow>
-                        <TableCell>Ticker</TableCell>
-                        <TableCell align="right">Name</TableCell>
-                        <TableCell align="right">Country</TableCell>
-                        <TableCell align="right">IPO</TableCell>
+                        <TableCell>Year</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    <TableRow
-                        key={'HI'}
-                        sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                    >
-                        <TableCell component="th" scope="row">
-                            {}
-                        </TableCell>
-                        <TableCell align="right">{}</TableCell>
-                        <TableCell align="right">{}</TableCell>
-                        <TableCell align="right">{}</TableCell>
-                        <TableCell> <Button title={'text'}/> </TableCell>
+                    {stockData && stockData.length ? stockData?.map(data =>
+                        (
+                            <TableRow>
+                                <TableCell>{data.year.toString()}</TableCell>
+                                <TableCell>
+                                    <IconButton aria-label={'arrow'} size={'large'} onClick={isModalOpen}>
+                                        <ArrowForwardIosIcon fontSize="small"/>
+                                    </IconButton>
+                                </TableCell>
 
-                    </TableRow>
+                            </TableRow>
+                        )
+                    ) : <TableRow>
+                    </TableRow>}
                 </TableBody>
             </Table>
+            <Dialog
+                keepMounted
+                open={openModal}
+                onClose={closeModal}
+                aria-labelledby="keep-mounted-modal-title"
+                aria-describedby="keep-mounted-modal-description">
+                <DialogTitle>{"Use Google's location service?"}</DialogTitle>
+                <DialogContent>
+                    <Table size='medium' aria-label="a dense table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Year</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {/*{stockData && stockData.length ? stockData?.map(data =>*/}
+                            {/*    data.map(*/}
+                            {/*        <TableRow>*/}
+                            {/*            <TableCell></TableCell>*/}
+                            {/*            <TableCell>*/}
+                            {/*                <IconButton aria-label={'arrow'} size={'large'} onClick={isModalOpen}>*/}
+                            {/*                    <ArrowForwardIosIcon fontSize="small"/>*/}
+                            {/*                </IconButton>*/}
+                            {/*            </TableCell>*/}
+
+                            {/*        </TableRow>*/}
+                            {/*    )*/}
+                            {/*) : <TableRow>*/}
+                            {/*</TableRow>}*/}
+                        </TableBody>
+                    </Table>
+                </DialogContent>
+                <DialogActions>
+                    <Button>Disagree</Button>
+                    <Button>Agree</Button>
+                </DialogActions>
+            </Dialog>
 
         </>
 
