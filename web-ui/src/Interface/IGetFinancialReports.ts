@@ -6,9 +6,9 @@ interface IReport {
 }
 
 export interface IFinancialReport {
-    bs: IReport,
-    ic: IReport,
-    cf: IReport
+    bs: IReport[],
+    ic: IReport[],
+    cf: IReport[]
 }
 
 export interface IGetFinancialReports {
